@@ -3204,6 +3204,41 @@ t.test('installLinks', (t) => {
   t.end()
 })
 
+t.test('root overrides with file: paths are visible to workspaces', async t => {
+  const path = t.testdir({
+    'package.json': JSON.stringify({
+      name: 'root',
+      workspaces: ['hello'],
+      dependencies: {},
+      overrides: {
+        print: 'file:./print',
+      },
+    }),
+    hello: {
+      'package.json': JSON.stringify({
+        name: 'hello',
+        version: '1.0.0',
+        dependencies: {
+          print: '../print',
+        },
+      }),
+    },
+    print: {
+      'package.json': JSON.stringify({
+        name: 'print',
+        version: '1.0.0',
+        main: 'index.js',
+      }),
+    },
+  })
+
+  createRegistry(t, false)
+  await reify(path)
+
+  const printSymlink = fs.readlinkSync(resolve(path, 'node_modules/print'))
+  t.equal(printSymlink, '../print', 'print symlink points to ../print')
+})
+
 t.test('should preserve exact ranges, missing actual tree', async (t) => {
   const Pacote = require('pacote')
   const Arborist = t.mock('../../lib/arborist', {
