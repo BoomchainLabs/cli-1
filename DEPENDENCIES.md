@@ -677,6 +677,7 @@ graph LR;
   npmcli-smoke-tests-->npmcli-promise-spawn["@npmcli/promise-spawn"];
   npmcli-smoke-tests-->npmcli-template-oss["@npmcli/template-oss"];
   npmcli-smoke-tests-->proxy;
+  npmcli-smoke-tests-->rimraf;
   npmcli-smoke-tests-->tap;
   npmcli-smoke-tests-->which;
   pacote-->cacache;
