@@ -3238,15 +3238,22 @@ t.test('root overrides with file: paths are visible to workspaces', async t => {
 
   const printSymlink = fs.readlinkSync(resolve(path, 'node_modules/print'))
 
-  if (process.platform === 'win32') {
-    // On Windows, convert the absolute path back to a relative one for comparison
-    const linkDir = dirname(resolve(path, 'node_modules/print'))
-    const relativePath = relative(linkDir, printSymlink)
-    t.equal(relativePath, '../print', 'print symlink points to ../print (normalized for Windows)')
-  } else {
-    // Unix systems return the actual path provided during symlink creation
-    t.equal(printSymlink, '../print', 'print symlink points to ../print')
+  // Create a platform-agnostic way to compare symlink targets
+  const normalizeLinkTarget = target => {
+    if (process.platform === 'win32') {
+      // For Windows: convert absolute paths to relative and normalize slashes
+      const linkDir = dirname(resolve(path, 'node_modules/print'))
+      return relative(linkDir, target).replace(/\\/g, '/')
+    }
+    // For Unix: already a relative path
+    return target
   }
+
+  t.equal(
+    normalizeLinkTarget(printSymlink),
+    '../print',
+    'print symlink points to ../print (normalized for platform)'
+  )
 })
 
 t.test('should preserve exact ranges, missing actual tree', async (t) => {
