@@ -8,6 +8,7 @@ const fs = require('node:fs')
 const fsp = require('node:fs/promises')
 const npmFs = require('@npmcli/fs')
 const MockRegistry = require('@npmcli/mock-registry')
+const { dirname, relative } = require('node:path')
 
 let failRm = false
 let failRename = null
@@ -3236,7 +3237,16 @@ t.test('root overrides with file: paths are visible to workspaces', async t => {
   await reify(path)
 
   const printSymlink = fs.readlinkSync(resolve(path, 'node_modules/print'))
-  t.equal(printSymlink, '../print', 'print symlink points to ../print')
+
+  if (process.platform === 'win32') {
+    // On Windows, convert the absolute path back to a relative one for comparison
+    const linkDir = dirname(resolve(path, 'node_modules/print'))
+    const relativePath = relative(linkDir, printSymlink)
+    t.equal(relativePath, '../print', 'print symlink points to ../print (normalized for Windows)')
+  } else {
+    // Unix systems return the actual path provided during symlink creation
+    t.equal(printSymlink, '../print', 'print symlink points to ../print')
+  }
 })
 
 t.test('should preserve exact ranges, missing actual tree', async (t) => {

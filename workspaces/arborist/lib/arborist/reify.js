@@ -877,7 +877,7 @@ module.exports = cls => class Reifier extends cls {
     const pathParts = filePath.split(/[\\/]/)
     const packageName = pathParts[pathParts.length - 1]
 
-    return relative(dir, resolve(dirname(dir), packageName))
+    return join('..', packageName)
   }
 
   #registryResolved (resolved) {
