@@ -331,15 +331,29 @@ module.exports = cls => class ActualLoader extends cls {
 
   async #loadFSTree (node) {
     const did = this.#actualTreeLoaded
-    if (!node.isLink && !did.has(node.target.realpath)) {
-      did.add(node.target.realpath)
-      await this.#loadFSChildren(node.target)
+
+    // For links, process the target node
+    // For regular nodes, process the node itself
+    const nodeToProcess = node.isLink ? node.target : node
+
+    // Skip if already processed or if nodeToProcess is undefined
+    if (!nodeToProcess || did.has(nodeToProcess.realpath)) {
+      return Promise.resolve()
+    }
+
+    did.add(nodeToProcess.realpath)
+    await this.#loadFSChildren(nodeToProcess)
+
+    // Process children if they exist
+    if (nodeToProcess.children.size > 0) {
       return Promise.all(
-        [...node.target.children.entries()]
-          .filter(([, kid]) => !did.has(kid.realpath))
+        [...nodeToProcess.children.entries()]
+          .filter(([, kid]) => kid && !did.has(kid.realpath))
           .map(([, kid]) => this.#loadFSTree(kid))
       )
     }
+
+    return Promise.resolve()
   }
 
   // create child nodes for all the entries in node_modules
