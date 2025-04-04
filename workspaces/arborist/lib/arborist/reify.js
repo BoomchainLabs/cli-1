@@ -867,7 +867,7 @@ module.exports = cls => class Reifier extends cls {
     const overrideSpec = node.root?.target?.package?.overrides?.[node.name]
     if (typeof overrideSpec === 'string' && overrideSpec.startsWith('file:')) {
       const overridePath = overrideSpec.replace(/^file:/, '')
-      const rootDir = dirname(nm)
+      const rootDir = node.root.target.path
       return relative(dir, resolve(rootDir, overridePath))
     }
 
