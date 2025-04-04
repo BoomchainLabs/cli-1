@@ -850,7 +850,7 @@ module.exports = cls => class Reifier extends cls {
     }) : p).then(() => node)
   }
 
-  #calculateRelativePath (node, dir, target, nm) {
+  #calculateRelativePath (node, dir, target) {
     // Check if the node is affected by a root override
     let hasRootOverride = [...node.edgesIn].some(edge => edge.from.isRoot && edge.overrides)
     // If not set via edges, see if the root package.json explicitly lists an override
